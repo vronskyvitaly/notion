@@ -1,103 +1,153 @@
-import Image from "next/image";
+'use client'
+import Button from '@/components/ui/Button'
+import CreateListModal from '@/components/ui/CreateListModal'
+import EditListName from '@/components/ui/EditListName'
+import Header from '@/components/ui/Header'
+import Sidebar from '@/components/ui/Sidebar'
+import TaskList from '@/components/ui/TaskList'
+import { TaskFormValues, taskSchema } from '@/hooks/schemas'
+import { useTasks } from '@/hooks/useTasks'
+import { useTodoLists } from '@/hooks/useTodoLists'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const { lists, listOrder, selectedListId, selectedList, addList, selectList, updateListName, deleteList } =
+    useTodoLists()
+  const { addTask } = useTasks()
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  const [newListName, setNewListName] = useState('')
+  const [showListInput, setShowListInput] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingList, setEditingList] = useState(false)
+  const [editListName, setEditListName] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<TaskFormValues>({
+    resolver: zodResolver(taskSchema)
+  })
+
+  const onSubmit = (data: TaskFormValues) => {
+    if (!selectedListId) return
+    addTask(data.input.trim(), data.inputDesc?.trim() || '')
+    reset()
+  }
+
+  const handleAddList = (name?: string) => {
+    const listName = typeof name === 'string' ? name : newListName
+    if (listName.trim() === '') return
+    addList(listName.trim())
+    setNewListName('')
+    setShowListInput(false)
+    setShowSidebar(false)
+    setShowCreateModal(false)
+  }
+
+  const startEditList = () => {
+    setEditListName(selectedList?.name || '')
+    setEditingList(true)
+  }
+  const cancelEditList = () => {
+    setEditingList(false)
+    setEditListName('')
+  }
+  const saveEditList = () => {
+    if (selectedList && editListName.trim()) {
+      updateListName(selectedList.id, editListName.trim())
+      setEditingList(false)
+    }
+  }
+
+  return (
+    <div className='min-h-screen bg-neutral-50 flex flex-col md:flex-row font-sans'>
+      {/* Header */}
+      <Header
+        onToggleSidebar={() => setShowSidebar(v => !v)}
+        onShowCreateList={() => setShowCreateModal(true)}
+        onLoginToggle={() => setIsLoggedIn(v => !v)}
+        isLoggedIn={isLoggedIn}
+      />
+      {/* Sidebar */}
+      <Sidebar
+        lists={lists}
+        listOrder={listOrder}
+        selectedListId={selectedListId}
+        selectList={selectList}
+        showSidebar={showSidebar}
+        showListInput={showListInput}
+        setShowListInput={setShowListInput}
+        newListName={newListName}
+        setNewListName={setNewListName}
+        handleAddList={handleAddList}
+        onDeleteList={deleteList}
+      />
+      {/* Create List Modal */}
+      <CreateListModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onCreate={handleAddList} />
+      {/* Main content */}
+      <main className='flex-1 min-h-screen flex flex-col justify-center items-center pt-20 pb-8 px-2'>
+        {selectedList ? (
+          <div className='w-full max-w-xl md:max-w-xl bg-white rounded-xl shadow p-2 sm:p-4 md:p-10 flex flex-col items-stretch overflow-x-auto'>
+            <div className='text-2xl md:text-2xl font-bold mb-2 md:mb-4 text-neutral-900 flex items-center gap-2'>
+              {editingList ? (
+                <EditListName
+                  editListName={editListName}
+                  setEditListName={setEditListName}
+                  saveEditList={saveEditList}
+                  cancelEditList={cancelEditList}
+                  disabled={!editListName.trim()}
+                />
+              ) : (
+                <>
+                  <span className='flex-1 text-[18px] md:text-2xl'>{selectedList.name}</span>
+                  <Button
+                    onClick={startEditList}
+                    className='text-yellow-700 text-2xl ml-2 hover:text-yellow-600 transition'
+                    title='Редактировать название списка'
+                  >
+                    ✏️
+                  </Button>
+                </>
+              )}
+            </div>
+            <div className='mb-8 w-full bg-white rounded-lg shadow p-4 border border-neutral-200'>
+              <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-2 w-full items-stretch'>
+                <div className='flex flex-col'>
+                  <input
+                    {...register('input')}
+                    placeholder='Название задачи'
+                    className='text-neutral-900 bg-white border border-neutral-300 rounded-md px-3 py-2 text-base outline-none focus:border-yellow-400 focus:bg-yellow-50 transition'
+                  />
+                  {errors.input && <span className='text-red-500 text-xs mt-1'>{errors.input.message}</span>}
+                </div>
+                <div className='flex flex-col'>
+                  <input
+                    {...register('inputDesc')}
+                    placeholder='Описание'
+                    className='text-neutral-900 bg-white border border-neutral-300 rounded-md px-3 py-2 text-base outline-none focus:border-yellow-400 focus:bg-yellow-50 transition'
+                  />
+                </div>
+                <button
+                  type='submit'
+                  className='w-full md:w-auto mt-2 whitespace-nowrap bg-yellow-400 hover:bg-yellow-500 text-white font-medium rounded px-3 py-1.5 shadow-sm transition border border-yellow-400 text-sm'
+                >
+                  Добавить
+                </button>
+              </form>
+            </div>
+            <hr className='my-6 border-neutral-200' />
+            <TaskList />
+          </div>
+        ) : (
+          <div className='text-neutral-400 text-center mt-32 text-xl font-medium'>Выберите или создайте список</div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
-  );
+  )
 }
