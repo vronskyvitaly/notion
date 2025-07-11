@@ -1,17 +1,19 @@
 export type Task = {
-  id: number
+  id: string
   text: string
   description?: string
   done: boolean
   dueDate?: string | null
   createdAt: string
+  listId: string
 }
 
 export type TodoList = {
-  id: number
+  id: string
   name: string
-  tasks: { [id: number]: Task }
-  taskOrder: number[]
+  userId: string
+  tasks: { [id: string]: Task }
+  taskOrder: string[]
 }
 
 // Тип формы задачи (TaskFormValues) импортируется из hooks/schemas, но если потребуется общий тип, можно добавить сюда.

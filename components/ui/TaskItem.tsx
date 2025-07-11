@@ -4,16 +4,16 @@ import React from 'react'
 
 interface TaskItemProps {
   task: Task
-  editingTaskId: number | null
+  editingTaskId: string | null
   editText: string
   setEditText: (v: string) => void
   editDesc: string
   setEditDesc: (v: string) => void
   startEdit: (task: Task) => void
   cancelEdit: () => void
-  saveEdit: (id: number) => void
-  toggleTask: (id: number) => void
-  deleteTask: (id: number) => void
+  saveEdit: (id: string) => void
+  toggleTask: (id: string) => void
+  deleteTask: (id: string) => void
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({

@@ -1,11 +1,11 @@
-import { useTasks } from '@/hooks/useTasks'
-import React, { useState } from 'react'
 import TaskItem from '@/components/ui/TaskItem'
+import { useTasks } from '@/hooks/useTasks'
 import { Task } from '@/types'
+import { useState } from 'react'
 
 const TaskList = () => {
   const { selectedList, toggleTask, deleteTask, updateTask } = useTasks()
-  const [editingTaskId, setEditingTaskId] = useState<number | null>(null)
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
   const [editDesc, setEditDesc] = useState('')
 
@@ -19,7 +19,7 @@ const TaskList = () => {
     setEditText('')
     setEditDesc('')
   }
-  const saveEdit = (id: number) => {
+  const saveEdit = (id: string) => {
     updateTask(id, editText.trim(), editDesc.trim())
     setEditingTaskId(null)
     setEditText('')
@@ -31,7 +31,7 @@ const TaskList = () => {
   }
   return (
     <ul className='list-none p-0 m-0'>
-      {selectedList.taskOrder.map((tid: number) => {
+      {selectedList.taskOrder.map((tid: string) => {
         const task = selectedList.tasks[tid]
         if (!task) return null
         return (
@@ -54,5 +54,7 @@ const TaskList = () => {
     </ul>
   )
 }
+
+TaskList.displayName = 'TaskList'
 
 export default TaskList

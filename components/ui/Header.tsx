@@ -115,12 +115,29 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onShowCreateList, isLoggedIn, onLoginToggle }) => {
   return (
-    <header className='fixed top-0 left-0 w-full h-14 bg-white dark:bg-neutral-900 shadow z-30 flex items-center justify-between px-2 md:px-8'>
-      <BurgerIcon onClick={onToggleSidebar} />
-      <div className='flex items-center gap-2'>
+    <header className='fixed top-0 left-0 w-full h-16 bg-gradient-to-r from-yellow-300 via-yellow-100 to-white shadow-lg backdrop-blur-md flex items-center justify-between px-4 md:px-10 z-30'>
+      <div className='flex items-center gap-3'>
+        <BurgerIcon onClick={onToggleSidebar} />
+        <span className='text-2xl font-extrabold tracking-tight text-yellow-700 drop-shadow'>Notion</span>
+      </div>
+      <div className='flex items-center gap-3'>
         <ThemeToggle />
         <PlusIcon onClick={onShowCreateList} />
-        {isLoggedIn ? <Button onClick={onLoginToggle}>Выйти</Button> : <Button onClick={onLoginToggle}>Войти</Button>}
+        {isLoggedIn ? (
+          <Button
+            onClick={onLoginToggle}
+            className='rounded-full bg-yellow-400 hover:bg-yellow-500 text-white shadow px-4 py-2'
+          >
+            Выйти
+          </Button>
+        ) : (
+          <Button
+            onClick={onLoginToggle}
+            className='rounded-full bg-yellow-400 hover:bg-yellow-500 text-white shadow px-4 py-2'
+          >
+            Войти
+          </Button>
+        )}
       </div>
     </header>
   )

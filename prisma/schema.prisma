@@ -1,0 +1,27 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Task {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  text        String
+  description String?
+  done        Boolean
+  createdAt   DateTime  @default(now())
+  listId      String
+  userId      String // Clerk user id
+  TodoList    TodoList? @relation(fields: [todoListId], references: [id])
+  todoListId  String?   @db.ObjectId
+}
+
+model TodoList {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  userId String // Clerk user id
+  tasks  Task[]
+}
